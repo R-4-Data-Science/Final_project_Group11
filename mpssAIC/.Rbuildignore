@@ -1,0 +1,7 @@
+\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^data-raw$
+^\.DS_Store$
+^README\.Rmd$
+^Final_Project_MPC\.Rmd$

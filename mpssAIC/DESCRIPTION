@@ -1,0 +1,27 @@
+Package: mpssAIC
+Type: Package
+Title: Multi-Path Stepwise Selection with AIC (Gaussian and Binomial)
+Version: 0.1.0
+Authors@R: c(
+    person(given = "Mark Philip", family = "Castillo", role = c("aut","cre"),
+           email = "markphilip.castillo@example.com"),
+    person(given = "ChatGPT", family = "Assistant", role = "ctb")
+)
+Description: Implements a branching forward-selection search with AIC, resampling-based
+    stability of features, and a plausible-model filter that combines AIC tolerance
+    and average feature stability. Supports Gaussian (linear) and Binomial (logistic)
+    families using base R 'glm'/'lm' and 'AIC' without external dependencies.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 4.0)
+Imports:
+    stats,
+    utils
+Suggests:
+    mlbench,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1

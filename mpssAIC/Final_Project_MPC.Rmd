@@ -1,0 +1,84 @@
+---
+title: "Final Project: Multi‑Path Stepwise Selection with AIC"
+author: "Mark Philip Castillo"
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    df_print: paged
+fontsize: 11pt
+---
+
+> Repository: **R-4-Data-Science/mpssAIC** (install with `remotes::install_github("R-4-Data-Science/mpssAIC")`)
+
+## 1. Overview
+
+This document demonstrates the package **mpssAIC** implementing:
+- Multi‑path forward selection with AIC (Gaussian & Binomial)
+- Resampling‑based stability (bootstrap/subsample)
+- Plausible model selection (AIC tolerance + average stability)
+
+## 2. Synthetic Demos (Base R Only)
+
+```r
+library(mpssAIC)
+set.seed(123)
+n <- 200; p <- 8
+X <- as.data.frame(matrix(rnorm(n*p), n, p)); names(X) <- paste0("x",1:p)
+beta <- c(2,-1.5,0,0,1,rep(0,p-5))
+y <- as.numeric(as.matrix(X) %*% beta + rnorm(n, sd=1.0))
+
+forest <- build_paths(X, y, family="gaussian", K=5, eps=1e-3, delta=2, L=50, trace=TRUE)
+head(forest$aic_by_model[order(forest$aic_by_model$AIC), ], 5)
+
+stab <- stability(X, y, B=30, resample="bootstrap",
+                  build_args=list(family="gaussian", K=5, eps=1e-3, delta=2, L=50))
+sort(stab$pi, decreasing = TRUE)
+
+plaus <- plausible_models(forest, pi=stab$pi, Delta=2, tau=0.4)
+plaus
+```
+
+### Logistic (Base R)
+
+```r
+set.seed(99)
+n <- 240; p <- 6
+X <- as.data.frame(matrix(rnorm(n*p), n, p)); names(X) <- paste0("x",1:p)
+lin <- 0.6 + 1.0*X$x1 - 1.2*X$x2 + 0.8*X$x5
+pr  <- 1/(1+exp(-lin)); y <- rbinom(n,1,pr)
+
+forest <- build_paths(X, y, family="binomial", K=4, eps=1e-3, delta=2, L=40)
+stab <- stability(X, y, B=30, resample="bootstrap",
+                  build_args=list(family="binomial", K=4, eps=1e-3, delta=2, L=40))
+plaus <- plausible_models(forest, pi=stab$pi, Delta=2, tau=0.45, attach_fits=TRUE, X=X, y=y)
+plaus
+
+if (nrow(plaus) > 0) {
+  fit <- plaus$fit[[1]]
+  prob <- predict(fit, type="response")
+  confusion_metrics(y, prob)
+}
+```
+
+## 3. Defaults & Justification
+
+- **K=4–5**: cap depth, avoids overfitting.
+- **eps=1e-3**: ensure meaningful AIC improvement vs parent.
+- **delta=2**: keep near-best children per parent (AIC support interval).
+- **L=40–60**: frontier size control.
+- **B=30–50**: stable feature proportions.
+- **Delta=2, tau=0.4–0.5**: balance fit and reliability.
+
+## 4. Notes for Graders
+
+- Package skeleton present (`R/`, `man/`, `DESCRIPTION`, `NAMESPACE`, `README`).
+- Exported functions documented with roxygen comments (run `devtools::document()`).
+- Vignette in `vignettes/` demonstrates the Wisconsin dataset (logistic pipeline).
+- This HTML can be knit directly after installing the package.
+```
+remotes::install_github("R-4-Data-Science/mpssAIC")
+rmarkdown::render("Final_Project_MPC.Rmd")
+```
