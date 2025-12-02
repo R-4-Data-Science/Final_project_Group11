@@ -1,0 +1,123 @@
+---
+title: "Multi-Path AIC Model Selection on Diabetes Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diabetes Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+install.packages("care")
+library(mpssAIC)
+library(care)
+set.seed(123)
+
+```
+
+Introduction
+
+This vignette demonstrates the use of the mpssAIC package on the
+efron2004 diabetes dataset (Efron et al., 2004), available in the care package.
+We illustrate multi-path model selection, variable stability, and plausible model evaluation.
+
+```{r}
+data(efron2004)
+X <- as.data.frame(efron2004$x)
+y <- as.numeric(efron2004$y)
+
+n <- nrow(X)
+idx_train <- sample(seq_len(n), size = floor(0.8*n))
+idx_test <- setdiff(seq_len(n), idx_train)
+
+X_train <- X[idx_train, ]
+y_train <- y[idx_train]
+
+X_test <- X[idx_test, ]
+y_test <- y[idx_test]
+
+```
+
+
+Build multi-path forward selection forest
+
+```{r}
+forest <- build_paths(
+X_train, y_train,
+family = "gaussian",
+K = 12,
+eps = 1e-6,
+delta = 2,
+L = 40
+)
+
+```
+
+Compute stability
+```{r}
+pi_vec <- stability(
+X_train, y_train,
+family = "gaussian",
+B = 40,
+resample = "bootstrap",
+K = 12,
+eps = 1e-6,
+delta = 2,
+L = 40
+)
+
+```
+
+Plausible models
+```{r}
+plaus <- plausible_models(
+forest,
+pi = pi_vec,
+Delta = 2,
+tau = 0.6
+)
+
+plaus
+
+
+```
+ Evaluate best model on test data
+```{r}
+
+if (nrow(plaus) > 0) {
+  # extract indices of variables in the best plausible model
+  best_key <- plaus$key[1]
+  best_idx <- as.integer(strsplit(best_key, ",")[[1]])
+
+  # subset training and test predictors
+  X_train_sub <- X_train[, best_idx, drop = FALSE]
+  X_test_sub  <- X_test[,  best_idx, drop = FALSE]
+
+  # build data frames for modeling
+  df_train <- data.frame(y = y_train, X_train_sub)
+  df_test  <- data.frame(X_test_sub)
+
+  # fit Gaussian model on training data
+  fit <- glm(y ~ ., data = df_train, family = gaussian())
+
+  # predict on test data
+  preds <- predict(fit, newdata = df_test)
+
+  # compute RMSE on test set
+  rmse <- sqrt(mean((preds - y_test)^2))
+  rmse
+}
+```
+
+
+
+Conclusion
+
+This vignette demonstrates how the mpssAIC package can be used to explore a
+Rashomon set of models, quantify variable stability, and select a set of
+plausible models with similar support in the data.
