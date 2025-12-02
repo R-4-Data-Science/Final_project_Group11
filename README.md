@@ -31,12 +31,20 @@
 Installation 
 
 # Option 1: Using devtools (our primary method)
-install.packages("devtools")
+  
+needed_pkgs <- c("devtools", "care", "corpcor")
+for (pkg in needed_pkgs) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+
 devtools::install_github(
   "R-4-Data-Science/Final_project_Group11",
   subdir = "mpssAIC",
   build_vignettes = TRUE
 )
+
+library(mpssAIC)
+library(care)
 
 # Option 2: Using remotes (also works, satisfies assignment requirement)
 # install.packages("remotes")
