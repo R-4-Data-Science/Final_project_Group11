@@ -1,6 +1,6 @@
 <div style="font-family:'Times New Roman', serif;">
 
-<h1>Final Project – Multi-Path Stepwise Selection with AIC</h1>
+<h1>Final Project – Multi-Path Stepwise Selection with AIC(Draft)</h1>
 <h3>STAT Programming with R — Group 11</h3>
 
 <p><strong>Authors:</strong> Mark Philip Castillo, Prince Mensah Ansah, Jonathan Ng</p>
