@@ -1,48 +1,58 @@
-# Final Project – Multi-Path Stepwise Selection with AIC
-STAT Programming with R — Group 11
+<div style="font-family:'Times New Roman', serif;">
 
-Authors: Mark Philip Castillo, Prince Mensah Ansah, Jonathan Ng
+<h1>Final Project – Multi-Path Stepwise Selection with AIC</h1>
+<h3>STAT Programming with R — Group 11</h3>
 
-Overview
+<p><strong>Authors:</strong> Mark Philip Castillo, Prince Mensah Ansah, Jonathan Ng</p>
 
-This repository contains our implementation of the Multi-Path Stepwise AIC Model Selection framework. The project includes all required components:
+<h2>Overview</h2>
 
-Algorithm 1 – Multi-Path Forward Selection
-Builds several forward-selection paths and avoids the limitations of greedy search.
+<p>This repository contains our implementation of the Multi-Path Stepwise AIC Model Selection framework. The project includes all required components:</p>
 
-Algorithm 2 – Stability via Resampling
-Uses bootstrap resampling to estimate how consistently each predictor appears across model paths.
+<ul>
+  <li><strong>Algorithm 1 – Multi-Path Forward Selection</strong><br>Builds several forward-selection paths and avoids the limitations of greedy search.</li>
 
-Algorithm 3 – Plausible Model Selection
-Combines AIC quality and variable stability to identify a final set of plausible and robust models.
+  <li><strong>Algorithm 2 – Stability via Resampling</strong><br>Uses bootstrap resampling to estimate how consistently each predictor appears across model paths.</li>
 
-Algorithm 4 – Full Pipeline
-Integrates Algorithms 1–3 into a single reproducible model-discovery workflow.
+  <li><strong>Algorithm 3 – Plausible Model Selection</strong><br>Combines AIC quality and variable stability to identify a final set of plausible and robust models.</li>
 
-R Package: mpssAIC
-Located in the mpssAIC/ directory with full documentation and a vignette.
+  <li><strong>Algorithm 4 – Full Pipeline</strong><br>Integrates Algorithms 1–3 into a single reproducible model-discovery workflow.</li>
+</ul>
 
-Final Report
-Provided as FinalProject.Rmd and FinalProject.html.
+<h2>R Package: <code>mpssAIC</code></h2>
+<p>Located in the <code>mpssAIC/</code> directory with full documentation and a vignette.</p>
 
+<h2>Final Report</h2>
+<p>Provided as <code>FinalProject.Rmd</code> and <code>FinalProject.html</code>.</p>
 
+<h2>Installation</h2>
 
-# Installation
+<pre>
+Installation 
 
-To install the mpssAIC package directly from GitHub:
-
-# install.packages("remotes")
-remotes::install_github(
+# Option 1: Using devtools (our primary method)
+install.packages("devtools")
+devtools::install_github(
   "R-4-Data-Science/Final_project_Group11",
   subdir = "mpssAIC",
   build_vignettes = TRUE
 )
 
+# Option 2: Using remotes (also works, satisfies assignment requirement)
+# install.packages("remotes")
+# remotes::install_github(
+#   "R-4-Data-Science/Final_project_Group11",
+#   subdir = "mpssAIC",
+#   build_vignettes = TRUE
+# )
 
-Then load the package:
 library(mpssAIC)
 
-Example Usage
+</pre>
+
+<h2>Example Usage</h2>
+
+<pre>
 set.seed(1)
 X <- data.frame(
   x1 = rnorm(50),
@@ -59,15 +69,15 @@ pi <- stability(X, y, B = 10)
 
 # Determine plausible models
 plausible_models(forest, pi)
+</pre>
 
-# Vignette
-A full worked example using the diabetes dataset is available:
-vignette("diabetes_mpssAIC")
+<h2>Vignette</h2>
+<p>A full worked example using the diabetes dataset is available:</p>
+<pre>vignette("diabetes_mpssAIC")</pre>
 
-# Project Summary
+<h2>Project Summary</h2>
+<p>
+This project implements a complete model-selection workflow that explores multiple model paths, quantifies predictor stability, and identifies robust, statistically competitive models. The approach improves interpretability and addresses the limitations of traditional single-path stepwise selection.
+</p>
 
-This project implements a complete model-selection workflow that:
-explores multiple model paths,
-quantifies predictor stability, and
-identifies robust, statistically competitive models.
-The approach improves interpretability and addresses the limitations of traditional single-path stepwise selection.
+</div>
