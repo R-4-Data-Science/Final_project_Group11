@@ -40,18 +40,15 @@ remotes::install_github(
 
 
 Then load the package:
-
 library(mpssAIC)
 
 Example Usage
 set.seed(1)
-
 X <- data.frame(
   x1 = rnorm(50),
   x2 = rnorm(50),
   x3 = rnorm(50)
 )
-
 y <- 1 + 2*X$x1 - X$x2 + rnorm(50)
 
 # Build model paths
@@ -63,20 +60,14 @@ pi <- stability(X, y, B = 10)
 # Determine plausible models
 plausible_models(forest, pi)
 
-Vignette
-
+# Vignette
 A full worked example using the diabetes dataset is available:
-
 vignette("diabetes_mpssAIC")
 
-Project Summary
+# Project Summary
 
 This project implements a complete model-selection workflow that:
-
 explores multiple model paths,
-
 quantifies predictor stability, and
-
 identifies robust, statistically competitive models.
-
 The approach improves interpretability and addresses the limitations of traditional single-path stepwise selection.
