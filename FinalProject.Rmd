@@ -1,7 +1,7 @@
 ---
 title: "Multi-Path Stepwise Model Selection with AIC"
 subtitle: "Final Project Report – Statistical Programming with R"
-author: "Mark Philip, Prince Mensah Ansa and Jonathan Ng"
+author: "Mark Philip, Prince Mensah Ansah and Jonathan Ng"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -895,5 +895,5 @@ Add confusion matrices and ROC curves for logistic models
 
 Apply the pipeline to real datasets and compare against LASSO or other modern methods.
 
-
+Some portions of the documentation, code refinement, and explanatory text were produced with assistance from an AI language model (ChatGPT). All algorithm design decisions, implementation logic, and final verification were performed by the authors. Link: 
 
