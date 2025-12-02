@@ -1,0 +1,20 @@
+Package: mpssAIC
+Type: Package
+Title: Multi-Path Stepwise Model Selection with AIC
+Version: 0.1.0
+Authors@R: 
+    c(person("Mark Philip", "Castillo", email = "mbc0078@auburn.edu", role = c("aut", "cre")))
+Description: Implements multi-path stepwise model selection using AIC, resampling-based stability, and plausible model selection.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.0.0)
+Imports: 
+    stats
+Suggests: 
+    knitr,
+    rmarkdown,
+    care,
+    mlbench
+VignetteBuilder: knitr
