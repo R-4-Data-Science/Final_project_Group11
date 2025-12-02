@@ -1,7 +1,7 @@
 ---
 title: "Multi-Path Stepwise Model Selection with AIC"
 subtitle: "Final Project Report – Statistical Programming with R"
-author: "Mark Philip, Prince, and Jonathan"
+author: "Mark Philip, Prince Mensah Ansa and Jonathan Ng"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -814,6 +814,7 @@ cat("\n### Stability Scores ###\n")
 print(round(result_logistic$stability_pi, 3))
 
 ```
+
 
 Interpretation & Key Insights
 Why This Method Works
