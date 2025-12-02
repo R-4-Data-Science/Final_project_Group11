@@ -13,7 +13,15 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-install.packages("care")
+
+# Do NOT install packages inside a vignette.
+# Assume 'care' is available (it's listed in Suggests in DESCRIPTION).
+# If it's missing, the user can install it manually.
+
+if (!requireNamespace("care", quietly = TRUE)) {
+  stop("The vignette requires the 'care' package. Please install it with install.packages('care').")
+}
+
 library(mpssAIC)
 library(care)
 set.seed(123)
