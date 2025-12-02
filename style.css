@@ -1,0 +1,39 @@
+    <style>
+      /* Hide pandoc's heading numbers (but NOT TOC numbers) */
+      .header-section-number {
+        display: none !important;
+      }
+
+      /* Set up counters */
+      body {
+        counter-reset: h1counter;
+      }
+
+      /* Do NOT number the document title */
+      h1.title,
+      h1#title-block-header {
+        counter-reset: h1counter 0;
+      }
+
+      /* Real sections (# ...), excluding the title */
+      h1:not(.title):not(#title-block-header) {
+        counter-increment: h1counter;
+        counter-reset: h2counter;
+      }
+
+      /* Add "Section N: "  (colon included) */
+      h1:not(.title):not(#title-block-header)::before {
+        content: "Section " counter(h1counter) ": ";
+        font-weight: inherit;
+      }
+
+      /* Subsections (## ...) */
+      h2 {
+        counter-increment: h2counter;
+      }
+
+      /* Add "N.M " (no colon) */
+      h2::before {
+        content: counter(h1counter) "." counter(h2counter) " ";
+        font-weight: inherit;
+      }

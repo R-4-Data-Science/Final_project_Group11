@@ -1,15 +1,24 @@
 ---
 title: "Multi-Path Stepwise Model Selection with AIC"
-subtitle: "Final Project Report – Statistical Programming with R"
-author: "Mark Philip, Prince Mensah Ansah and Jonathan Ng"
+subtitle: |
+  Final Project Report – Statistical Programming with R
+  <br>
+  Group 11
+  [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11t)
+  <span style="font-size:70%"><https://github.com/R-4-Data-Science/Final_project_Group11></span>
+  <br>mpssAIC Repo
+  [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC)
+  <span style="font-size:70%"><https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC></span>
+author: "Mark Philip, Prince Mensah Ansah, and Jonathan Ng"
 date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
     toc_float: true
-    number_sections: true
+    number_sections: false
     theme: cosmo
     code_folding: show
+    css: "style.css"
 fontsize: 11pt
 ---
 
@@ -68,6 +77,7 @@ Repository: R-4-Data-Science/Final_project_Group11
 Package subdirectory: mpssAIC
 
 To install the package from GitHub:
+
 
 # install.packages("devtools")
 ```{r install-mpssAIC, eval = FALSE}
@@ -131,9 +141,9 @@ y_logistic <- rbinom(n2, size = 1, prob = pr)
 ```
 
 
-# Section 2: Core Helper Functions
+# Core Helper Functions
 
-## 2.1 Function to Fit and Return AIC
+## Function to Fit and Return AIC
 
 Core Helper Function
 Fit Model and Return AIC
@@ -206,9 +216,9 @@ cat("Test: AIC with x1 + x2    =", round(test_aic_two_vars, 3), "\n")
 
 
 
-# Section 3: Algorithm 1 – Multiple-Path Forward Selection
+# Algorithms
 
-Algorithm 1 – Multi-Path Forward Selection
+## Algorithm 1 – Multi-Path Forward Selection
 This algorithm builds multiple forward-selection paths by:
 Starting from the empty model (intercept only)
 At each step, for each parent model, adding one unused variable to create children
@@ -391,7 +401,7 @@ print(sapply(mp_full_linear$step_models, length))
 
 
 
-# Section 4: Algorithm 2 – Stability via Resampling
+## Algorithm 2 – Stability via Resampling
 
 This algorithm estimates how stable each predictor is across resamples:
 For each of B bootstrap (or subsample) replicates:
@@ -519,7 +529,7 @@ legend("topright", legend = "τ = 0.6 threshold", lty = 2, col = "red")
 
 
 
-# Section 5: Algorithm 3 – Plausible Model Selection
+## Algorithm 3 – Plausible Model Selection
 
 Algorithm 3 combines AIC and stability:
 From Algorithm 1, collect all models and their AIC values.
@@ -648,7 +658,105 @@ select_plausible_models <- function(
 
 ```
 
-# Algorithm 4 – Full Multi-Path AIC Pipeline
+## Algorithm 4 – (Optional) confusion_metrics() for logistic models
+
+Provide a convenience function to compute confusion matrix and standard metrics at cutoff 0.5 (prevalence, accuracy, sensitivity, specificity, FDR, DOR).
+
+``` r
+#' (Optional) Confusion metrics for logistic models
+#'
+#' Computes confusion matrix and basic metrics at cutoff 0.5:
+#' prevalence, accuracy, sensitivity, specificity, FDR, DOR.
+#'
+#' @param fit glm object with binomial family
+#' @param y optional true labels (0/1 or 2-level factor). If NULL,
+#'   tries to use fit$y.
+#' @param newdata optional newdata for prediction; if NULL, uses training data.
+#' @param cutoff probability threshold (default 0.5)
+#'
+#' @return list with 'confusion_matrix' and 'metrics' (named numeric vector)
+confusion_metrics <- function(
+    fit,
+    y = NULL,
+    newdata = NULL,
+    cutoff = 0.5
+) {
+  if (!inherits(fit, "glm")) {
+    stop("'fit' must be a glm object.")
+  }
+  fam <- stats::family(fit)$family
+  if (fam != "binomial") {
+    stop("'fit' must have binomial family.")
+  }
+  
+  if (is.null(newdata)) {
+    probs <- stats::fitted(fit)
+  } else {
+    probs <- stats::predict(fit, newdata = newdata, type = "response")
+  }
+  
+  if (is.null(y)) {
+    if (!is.null(fit$y)) {
+      y <- fit$y
+    } else {
+      stop("Argument 'y' must be supplied if fit$y is not available.")
+    }
+  }
+  
+  if (is.factor(y)) {
+    if (nlevels(y) != 2L) stop("y must be binary.")
+    y <- as.integer(y == levels(y)[2L])
+  } else {
+    y <- as.numeric(y)
+  }
+  
+  if (length(y) != length(probs)) {
+    stop("length(y) must equal length of predicted probabilities.")
+  }
+  
+  pred <- as.integer(probs >= cutoff)
+  
+  TP <- sum(pred == 1 & y == 1, na.rm = TRUE)
+  TN <- sum(pred == 0 & y == 0, na.rm = TRUE)
+  FP <- sum(pred == 1 & y == 0, na.rm = TRUE)
+  FN <- sum(pred == 0 & y == 1, na.rm = TRUE)
+  
+  total <- TP + TN + FP + FN
+  
+  prevalence  <- (TP + FN) / total
+  accuracy    <- (TP + TN) / total
+  sensitivity <- if ((TP + FN) == 0) NA_real_ else TP / (TP + FN)
+  specificity <- if ((TN + FP) == 0) NA_real_ else TN / (TN + FP)
+  FDR         <- if ((TP + FP) == 0) NA_real_ else FP / (TP + FP)
+  DOR         <- if (TP == 0 || TN == 0 || FP == 0 || FN == 0) {
+    NA_real_
+  } else {
+    (TP * TN) / (FP * FN)
+  }
+  
+  cm <- matrix(
+    c(TN, FP, FN, TP),
+    nrow = 2, byrow = TRUE,
+    dimnames = list(
+      Predicted = c("0", "1"),
+      True      = c("0", "1")
+    )
+  )
+  
+  list(
+    confusion_matrix = cm,
+    metrics = c(
+      prevalence  = prevalence,
+      accuracy    = accuracy,
+      sensitivity = sensitivity,
+      specificity = specificity,
+      FDR         = FDR,
+      DOR         = DOR
+    )
+  )
+}
+```
+## Algorithm 5 – Full Multi-Path AIC Pipeline
 
 This function runs all three algorithms in sequence and returns a structured result.
 
@@ -739,7 +847,9 @@ multi_path_AIC_pipeline <- function(
 
 ```
 
-# Section 8: Complete Example – Linear Regression (Synthetic)
+# Complete Examples
+
+## Linear Regression (Synthetic)
 
 For classification, we use a binary outcome. Here, high MPG (≥20) vs. low MPG (<20).
 
@@ -867,7 +977,7 @@ print(params_df)
 
 
 
-Conclusion
+# Conclusion
 
 This report demonstrates a complete, reproducible implementation of the Multi-Path Stepwise Model Selection with AIC framework:
 
