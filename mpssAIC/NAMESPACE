@@ -1,5 +1,0 @@
-export(build_paths)
-export(stability)
-export(plausible_models)
-export(confusion_metrics)
-importFrom(stats,glm,gaussian,binomial,model.matrix,model.frame,as.formula,AIC,coef,predict,lm)
