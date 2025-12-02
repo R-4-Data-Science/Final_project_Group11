@@ -28,13 +28,26 @@
 <h2>Installation</h2>
 
 <pre>
-install.packages("remotes")
-remotes::install_github(
+Installation 
+
+# Option 1: Using devtools (our primary method)
+install.packages("devtools")
+devtools::install_github(
   "R-4-Data-Science/Final_project_Group11",
   subdir = "mpssAIC",
   build_vignettes = TRUE
 )
+
+# Option 2: Using remotes (also works, satisfies assignment requirement)
+# install.packages("remotes")
+# remotes::install_github(
+#   "R-4-Data-Science/Final_project_Group11",
+#   subdir = "mpssAIC",
+#   build_vignettes = TRUE
+# )
+
 library(mpssAIC)
+
 </pre>
 
 <h2>Example Usage</h2>
