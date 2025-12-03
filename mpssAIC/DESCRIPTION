@@ -2,19 +2,51 @@ Package: mpssAIC
 Type: Package
 Title: Multi-Path Stepwise Model Selection with AIC
 Version: 0.1.0
-Authors@R: 
-    c(person("Mark Philip", "Castillo", email = "mbc0078@auburn.edu", role = c("aut", "cre")))
-Description: Implements multi-path stepwise model selection using AIC, resampling-based stability, and plausible model selection.
+Authors@R: c(
+    person(
+      "Jonathan", "Ng",
+      email = "jzn0041@auburn.edu",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Mark Castilo", "Philip",
+      email = "mbc0078@auburn.edu",
+      role = "aut"
+    ),
+    person(
+      "Prince Mensah", "Ansah",
+      email = "pma0020@auburn.edu",
+      role = "aut"
+    )
+  )
+Description: Implements multi-path forward selection for linear and logistic 
+    regression models using the Akaike Information Criterion (AIC). Unlike 
+    traditional stepwise selection that follows a single path, this package 
+    explores multiple near-optimal variable selection paths simultaneously by 
+    keeping models within a specified AIC tolerance. The package provides three 
+    core functions: build_paths() performs multi-path forward selection, 
+    stability() assesses variable stability through resampling (bootstrap or 
+    subsample), and plausible_models() filters models based on both AIC quality 
+    and average stability scores. This approach identifies reliable models that 
+    are both statistically sound and robust to data perturbations, making it 
+    particularly useful for exploratory analysis and variable selection in 
+    high-dimensional settings. The stability assessment computes the proportion 
+    of models each predictor appears in across resamples, providing an intuitive 
+    measure of variable importance and reliability.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
-Depends: R (>= 4.0.0)
-Imports: 
+LazyData: true
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 3.5.0)
+Imports:
     stats
-Suggests: 
+Suggests:
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown,
     care,
     mlbench
 VignetteBuilder: knitr
+URL: https://github.com/R-4-Data-Science/Final_project_Group11
+BugReports: https://github.com/R-4-Data-Science/Final_project_Group11/issues
