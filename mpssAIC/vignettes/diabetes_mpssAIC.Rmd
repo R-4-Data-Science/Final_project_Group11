@@ -122,8 +122,6 @@ if (nrow(plaus) > 0) {
 }
 ```
 
-
-
 Conclusion
 
 This vignette demonstrates how the mpssAIC package can be used to explore a
