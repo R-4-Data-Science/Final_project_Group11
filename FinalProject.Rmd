@@ -1181,7 +1181,7 @@ model options rather than a single brittle solution.
 **Reproducibility Note:**
 
 Portions of the documentation, code refinement, and explanatory text were produced 
-with assistance from an AI language model (ChatGPT). All algorithm design decisions, 
+with assistance from an AI language model (https://claude.ai/chat/60acf8a1-754e-4735-ba35-3efc3f72f38c). All algorithm design decisions, 
 implementation logic, and final verification were performed by the authors.
 
 **Repository:** https://github.com/R-4-Data-Science/Final_project_Group11
