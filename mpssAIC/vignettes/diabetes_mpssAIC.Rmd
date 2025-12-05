@@ -29,7 +29,6 @@ set.seed(123)
 ```
 
 Introduction
-
 This vignette demonstrates the use of the mpssAIC package on the
 efron2004 diabetes dataset (Efron et al., 2004), available in the care package.
 We illustrate multi-path model selection, variable stability, and plausible model evaluation.
@@ -121,9 +120,7 @@ if (nrow(plaus) > 0) {
   rmse
 }
 ```
-
 Conclusion
-
 This vignette demonstrates how the mpssAIC package can be used to explore a
 Rashomon set of models, quantify variable stability, and select a set of
 plausible models with similar support in the data.

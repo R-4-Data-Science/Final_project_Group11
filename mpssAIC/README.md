@@ -72,6 +72,7 @@ plaus <- plausible_models(
 ```
 plaus
 ```
+
 # Sample output:
 
 | key |   AIC    | AIC_diff | size |   vars    | avg_stability |

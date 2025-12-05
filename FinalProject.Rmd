@@ -110,7 +110,58 @@ The assignment requires synthetic examples in the HTML submission. To ensure ful
 
 A Gaussian (linear regression) example
 
+```{r}
+set.seed(1)
+n <- 120; p <- 8
+X <- matrix(rnorm(n*p), n, p)
+beta <- c(2, -1.5, 0, 0, 1, rep(0, p-5))
+y <- X %*% beta + rnorm(n, sd = 1)
+colnames(X) <- paste0("x", 1:p)
+df <- as.data.frame(cbind(y, X))
+
+# Fit a few single-step candidates to illustrate AIC comparisons:
+aic_empty <- AIC(lm(y ~ 1, data = df))
+cand <- lapply(1:p, function(j) lm(as.formula(paste0("y ~ ", colnames(X)[j])), data = df))
+aics <- sapply(cand, AIC)
+data.frame(variable = colnames(X), AIC = aics)[order(aics), ][1:8, ]
+```
+
+##  Reproducing results using `mpssAIC`
+```{r}
+
+forest <- build_paths(X = X, y = as.numeric(y), family = "gaussian", K = min(ncol(X), 10), eps = 1e-6, delta = 1, L = 50)
+
+stab <- stability(X = X, y = as.numeric(y), B = 50, resample = "bootstrap", family = "gaussian", K = 10, eps = 1e-6, delta = 1, L = 50)
+
+plaus <- plausible_models(forest, pi = stab, Delta = 2, tau = 0.6)
+plaus
+```
+
+```{r}
+data.frame(variable = forest$var_names, AIC = forest$step_AICs)[order(forest$step_AICs), ][1:8, ]
+```
+
+
+
 A Binomial (logistic regression) example
+```{r}
+set.seed(2)
+n <- 200; p <- 6
+Xb <- matrix(rnorm(n*p), n, p)
+linpred <- 1.2*Xb[,1] - 1*Xb[,2] + 0.8*Xb[,5]
+prob <- 1 / (1 + exp(-linpred))
+ybin <- rbinom(n, 1, prob)
+colnames(Xb) <- paste0("x", 1:p)
+dfb <- as.data.frame(cbind(y = ybin, Xb))
+
+# Compare intercept-only vs. adding one variable by AIC:
+fit0 <- glm(y ~ 1, family = binomial(), data = dfb)
+aic0 <- AIC(fit0)
+fits1 <- lapply(1:p, function(j) glm(as.formula(paste0("y ~ ", colnames(Xb)[j])),
+                                     family = binomial(), data = dfb))
+aics1 <- sapply(fits1, AIC)
+head(data.frame(variable = colnames(Xb), AIC = aics1)[order(aics1), ], 5)
+```
 
 
 
