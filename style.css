@@ -1,4 +1,3 @@
-    <style>
       /* Hide pandoc's heading numbers (but NOT TOC numbers) */
       .header-section-number {
         display: none !important;
@@ -37,3 +36,20 @@
         content: counter(h1counter) "." counter(h2counter) " ";
         font-weight: inherit;
       }
+      
+      /* Sub-subsections (### ...) */
+      h3 {
+        counter-increment: h3counter;
+      }
+      
+      /* Reset h3 counter when a new h2 starts */
+      h2 {
+        counter-reset: h3counter;
+      }
+      
+      /* Add "N.M.K " numbering */
+      h3::before {
+        content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) " ";
+        font-weight: inherit;
+      }
+      
