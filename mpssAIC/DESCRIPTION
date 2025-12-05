@@ -46,7 +46,8 @@ Suggests:
     knitr,
     rmarkdown,
     care,
-    mlbench
+    mlbench,
+    shiny
 VignetteBuilder: knitr
 URL: https://github.com/R-4-Data-Science/Final_project_Group11
 BugReports: https://github.com/R-4-Data-Science/Final_project_Group11/issues

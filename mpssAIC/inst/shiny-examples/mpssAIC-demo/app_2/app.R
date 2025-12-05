@@ -1,3 +1,14 @@
+# inst/shiny-examples/mpssAIC-demo/app.R
+
+library(shiny)
+library(mpssAIC)  # your package with multi_path_AIC_pipeline(), confusion_metrics(), etc.
+
+# -------------------------------------------------------------
+
+# Core Helper: fit_model_aic()
+
+# -------------------------------------------------------------
+
 #' Compute AIC for a model with selected predictors
 #'
 #' @param X A data frame of predictors (n × p)
@@ -6,23 +17,24 @@
 #' @param model_type Either "gaussian" or "binomial"
 #'
 #' @return Numeric AIC value
-#' @keywords internal
 fit_model_aic <- function(X, y, vars, model_type = c("gaussian", "binomial")) {
   model_type <- match.arg(model_type)
-
+  
   # Empty model (intercept only)
+  
   if (length(vars) == 0) {
     df  <- data.frame(y = y)
     fam <- if (model_type == "gaussian") gaussian() else binomial()
     fit <- glm(y ~ 1, data = df, family = fam)
     return(AIC(fit))
   }
-
+  
   # Data frame with selected predictors
+  
   df  <- data.frame(y = y, X[, vars, drop = FALSE])
   fam <- if (model_type == "gaussian") gaussian() else binomial()
   fit <- glm(y ~ ., data = df, family = fam)
-
+  
   AIC(fit)
 }
 
@@ -38,7 +50,6 @@ fit_model_aic <- function(X, y, vars, model_type = c("gaussian", "binomial")) {
 #' @param K, eps, delta, L Algorithm 1 parameters
 #'
 #' @return Numeric vector of stability scores (one per predictor)
-#' @keywords internal
 compute_stability <- function(
     X, y,
     model_type = c("gaussian", "binomial"),
@@ -102,9 +113,10 @@ compute_stability <- function(
       ))
       Z[b, j] <- count_j / M
     }
+    
   }
   
-  # Average over resamples
+  #Average over resamples
   
   pi <- colMeans(Z)
   
@@ -116,7 +128,7 @@ compute_stability <- function(
 }
 
 #-------------------------------------------------------------
-# Algorithm 1: multi_path_forward()
+#Algorithm 1: multi_path_forward()
 #-------------------------------------------------------------
 
 #' Algorithm 1: Multiple-Path Forward Selection
@@ -133,7 +145,6 @@ compute_stability <- function(
 #' - var_names: predictor names
 #' - step_models: models at each step (list of lists)
 #' - step_AICs: corresponding AICs
-#' @keywords internal
 multi_path_forward <- function(
     X, y,
     model_type = c("gaussian", "binomial"),
@@ -149,16 +160,14 @@ multi_path_forward <- function(
   var_names <- colnames(X)
   if (is.null(K)) K <- min(p, 10)
   
-  # Helper to create unique key for a model
+  #Helper to create unique key for a model
   
   model_key <- function(idx) {
-    if (length(idx) == 0) {
-      return("")
-    }
+    if (length(idx) == 0) return("")
     paste(sort(idx), collapse = ",")
   }
   
-  # Initialize: parent is empty model (intercept only)
+  #Initialize: parent is empty model (intercept only)
   
   parent_models <- list(integer(0))
   parent_AICs <- fit_model_aic(X, y, vars = integer(0), model_type = model_type)
@@ -179,17 +188,17 @@ multi_path_forward <- function(
       parent_aic <- parent_AICs[m]
       
       remaining <- setdiff(seq_len(p), parent_idx)
-      if (length(remaining) == 0) next # no more variables to add
+      if (length(remaining) == 0) next  # no more variables to add
       
       cand_models <- list()
-      cand_AICs <- numeric(0)
+      cand_AICs   <- numeric(0)
       
       # Try adding each remaining variable
       for (j in remaining) {
         child_idx <- sort(c(parent_idx, j))
         aic_child <- fit_model_aic(X, y, vars = child_idx, model_type = model_type)
         cand_models[[length(cand_models) + 1]] <- child_idx
-        cand_AICs[length(cand_AICs) + 1] <- aic_child
+        cand_AICs[length(cand_AICs) + 1]       <- aic_child
       }
       
       if (!length(cand_AICs)) next
@@ -207,11 +216,11 @@ multi_path_forward <- function(
       for (i_keep in keep_idx) {
         child_idx <- cand_models[[i_keep]]
         aic_child <- cand_AICs[i_keep]
-        key <- model_key(child_idx)
+        key       <- model_key(child_idx)
         
         children_list[[length(children_list) + 1]] <- child_idx
-        children_AICs[length(children_AICs) + 1] <- aic_child
-        children_keys[length(children_keys) + 1] <- key
+        children_AICs[length(children_AICs) + 1]   <- aic_child
+        children_keys[length(children_keys) + 1]   <- key
       }
     }
     
@@ -240,7 +249,7 @@ multi_path_forward <- function(
     
     # Convert keys back to index vectors
     new_parents <- vector("list", nrow(agg))
-    new_AICs <- numeric(nrow(agg))
+    new_AICs    <- numeric(nrow(agg))
     
     for (i in seq_len(nrow(agg))) {
       key <- agg$key[i]
@@ -250,14 +259,15 @@ multi_path_forward <- function(
         idx <- as.integer(strsplit(key, ",")[[1]])
       }
       new_parents[[i]] <- idx
-      new_AICs[i] <- agg$AIC[i]
+      new_AICs[i]      <- agg$AIC[i]
     }
     
     step_models[[k]] <- new_parents
-    step_AICs[[k]] <- new_AICs
+    step_AICs[[k]]   <- new_AICs
     
     parent_models <- new_parents
-    parent_AICs <- new_AICs
+    parent_AICs   <- new_AICs
+    
   }
   
   cat("\n=== Algorithm 1 Complete ===\n")
@@ -271,7 +281,7 @@ multi_path_forward <- function(
 
 
 #-------------------------------------------------------------
-# Algorithm 4: multi_path_AIC_pipeline()
+#Algorithm 4: multi_path_AIC_pipeline()
 #-------------------------------------------------------------
 
 #' Algorithm 4: Complete Multi-Path AIC Pipeline
@@ -287,7 +297,6 @@ multi_path_forward <- function(
 #'   - mp_full: Algorithm 1 output
 #'   - stability_pi: Algorithm 2 output
 #'   - plausible: Algorithm 3 output
-#' @keywords internal
 multi_path_AIC_pipeline <- function(
     X, y,
     model_type = c("gaussian", "binomial"),
@@ -301,7 +310,7 @@ multi_path_AIC_pipeline <- function(
     Delta = 2,
     tau = 0.6
 ) {
-  model_type <- match.arg(model_type)
+  model_type    <- match.arg(model_type)
   resample_type <- match.arg(resample_type)
   
   cat("\n", strrep("=", 60), "\n")
@@ -325,10 +334,10 @@ multi_path_AIC_pipeline <- function(
   cat("\n>>> STEP 2: Stability Estimation via Resampling <<<\n\n")
   stability_pi <- compute_stability(
     X = X, y = y,
-    model_type = model_type,
-    B = B,
+    model_type    = model_type,
+    B             = B,
     resample_type = resample_type,
-    m = m,
+    m             = m,
     K = K,
     eps = eps,
     delta = delta,
@@ -373,28 +382,26 @@ multi_path_AIC_pipeline <- function(
 #' @return Data frame of plausible models:
 #'   columns = key, AIC, AIC_diff, size, vars, avg_stability
 #'
-#' @keywords internal
 select_plausible_models <- function(
     mp_full,
     stability_pi,
     Delta = 2,
     tau = 0.6
 ) {
-  var_names <- mp_full$var_names
+  
+  var_names   <- mp_full$var_names
   step_models <- mp_full$step_models
-  step_AICs <- mp_full$step_AICs
+  step_AICs   <- mp_full$step_AICs
   
   # Helper: unique key for a set of variables
   model_key <- function(idx) {
-    if (length(idx) == 0) {
-      return("")
-    }
+    if (length(idx) == 0) return("")
     paste(sort(idx), collapse = ",")
   }
   
   # Flatten all models and AICs
   all_models <- unlist(step_models, recursive = FALSE)
-  all_AICs <- unlist(step_AICs)
+  all_AICs   <- unlist(step_AICs)
   
   if (length(all_models) == 0) {
     cat("No models generated!\n")
@@ -422,8 +429,8 @@ select_plausible_models <- function(
   }
   
   # Compute AIC differences
-  best_AIC <- min(agg$AIC)
-  agg$AIC_diff <- agg$AIC - best_AIC
+  best_AIC      <- min(agg$AIC)
+  agg$AIC_diff  <- agg$AIC - best_AIC
   
   # Filter by AIC ≤ best + Delta
   plausible <- agg[agg$AIC_diff <= Delta, ]
@@ -434,9 +441,9 @@ select_plausible_models <- function(
   }
   
   # Compute size and stability
-  size <- integer(nrow(plausible))
-  avg_stab <- numeric(nrow(plausible))
-  vars_str <- character(nrow(plausible))
+  size      <- integer(nrow(plausible))
+  avg_stab  <- numeric(nrow(plausible))
+  vars_str  <- character(nrow(plausible))
   
   for (i in seq_len(nrow(plausible))) {
     key <- plausible$key[i]
@@ -451,8 +458,8 @@ select_plausible_models <- function(
     avg_stab[i] <- mean(stability_pi[these_vars])
   }
   
-  plausible$size <- size
-  plausible$vars <- vars_str
+  plausible$size          <- size
+  plausible$vars          <- vars_str
   plausible$avg_stability <- avg_stab
   
   # Filter by stability threshold τ
@@ -474,18 +481,219 @@ select_plausible_models <- function(
 }
 
 
-#' Run the mpssAIC Shiny demonstration app
-#'
-#' This launches a Shiny app illustrating the multi-path AIC pipeline
-#' for linear (Gaussian) and logistic (binomial) regression.
-#'
-#' @keywords internal
-run_mpssAIC_demo <- function() {
-  app_dir <- system.file("shiny-examples", "mpssAIC-demo", package = "mpssAIC")
-  if (app_dir == "") {
-    stop("Could not find Shiny app directory. Try reinstalling the 'mpssAIC' package.",
-         call. = FALSE)
-  }
-  shiny::runApp(app_dir, display.mode = "normal")
+ui <- fluidPage(
+  titlePanel("mpssAIC – Multi-Path AIC Pipeline Demo"),
+  
+  tabsetPanel(
+    tabPanel(
+      "Linear Regression (Gaussian)",
+      br(),
+      h3("Plausible Models (Gaussian)"),
+      tableOutput("linear_plausible"),
+      br(),
+      h3("Stability Scores"),
+      tableOutput("linear_stability")
+    ),
+    
+    tabPanel(
+      "Logistic Regression (Binomial)",
+      br(),
+      h3("Plausible Models (Binomial)"),
+      tableOutput("logistic_plausible"),
+      br(),
+      h3("Stability Scores"),
+      tableOutput("logistic_stability"),
+      br(),
+      h3("Confusion Matrix (Best Plausible Model)"),
+      tableOutput("logistic_cm"),
+      br(),
+      h3("Classification Metrics"),
+      tableOutput("logistic_metrics"),
+      br(),
+      h3("Confusion Matrix Plot"),
+      plotOutput("logistic_cm_plot", height = "300px")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  ## --------------------------------------------------------------
+  ## 1. Simulate synthetic data
+  ##    (self-contained; no need for extra exported objects)
+  ## --------------------------------------------------------------
+  
+  set.seed(123)
+  
+  # ---- Linear regression (Gaussian) ----
+  n_lin <- 300
+  p_lin <- 6
+  X_linear <- matrix(rnorm(n_lin * p_lin), nrow = n_lin, ncol = p_lin)
+  colnames(X_linear) <- paste0("x", 1:p_lin)
+  
+  beta_lin <- c(1.0, -1.5, 0.75, 0.5, 0, 0)
+  y_linear <- as.numeric(X_linear %*% beta_lin + rnorm(n_lin, sd = 1))
+  
+  # ---- Logistic regression (Binomial) ----
+  n_log <- 300
+  p_log <- 6
+  X_logistic <- matrix(rnorm(n_log * p_log), nrow = n_log, ncol = p_log)
+  colnames(X_logistic) <- paste0("x", 1:p_log)
+  
+  beta_log <- c(1.0, -1.5, 0.75, 0, 0, 0)
+  eta <- X_logistic %*% beta_log
+  prob <- plogis(eta)
+  y_logistic <- rbinom(n_log, size = 1, prob = prob)
+  
+  ## --------------------------------------------------------------
+  ## 2. Run multi-path AIC pipeline using mpssAIC functions
+  ## --------------------------------------------------------------
+  
+  # Gaussian
+  result_linear <- multi_path_AIC_pipeline(
+    X             = X_linear,
+    y             = y_linear,
+    model_type    = "gaussian",
+    K             = NULL,      # e.g. min(p, 10)
+    eps           = 1e-6,
+    delta         = 2,
+    L             = 50,
+    B             = 20,        # increase for more stable results
+    resample_type = "bootstrap",
+    m             = NULL,
+    Delta         = 2,
+    tau           = 0.6
+  )
+  
+  # Binomial
+  result_logistic <- multi_path_AIC_pipeline(
+    X             = X_logistic,
+    y             = y_logistic,
+    model_type    = "binomial",
+    K             = NULL,
+    eps           = 1e-6,
+    delta         = 2,
+    L             = 50,
+    B             = 20,
+    resample_type = "bootstrap",
+    m             = NULL,
+    Delta         = 2,
+    tau           = 0.6
+  )
+  
+  ## --------------------------------------------------------------
+  ## 3. Linear outputs
+  ## --------------------------------------------------------------
+  
+  output$linear_plausible <- renderTable({
+    if (is.null(result_linear$plausible) ||
+        nrow(result_linear$plausible) == 0) {
+      return(NULL)
+    }
+    tab <- result_linear$plausible[
+      , c("AIC", "AIC_diff", "size", "vars", "avg_stability")
+    ]
+    rownames(tab) <- NULL
+    tab
+  })
+  
+  output$linear_stability <- renderTable({
+    if (is.null(result_linear$stability_pi)) return(NULL)
+    data.frame(
+      Variable  = names(result_linear$stability_pi),
+      Stability = round(as.numeric(result_linear$stability_pi), 3),
+      row.names = NULL
+    )
+  })
+  
+  ## --------------------------------------------------------------
+  ## 4. Logistic outputs (incl. confusion matrix)
+  ## --------------------------------------------------------------
+  
+  output$logistic_plausible <- renderTable({
+    if (is.null(result_logistic$plausible) ||
+        nrow(result_logistic$plausible) == 0) {
+      return(NULL)
+    }
+    tab <- result_logistic$plausible[
+      , c("AIC", "AIC_diff", "size", "vars", "avg_stability")
+    ]
+    rownames(tab) <- NULL
+    tab
+  })
+  
+  output$logistic_stability <- renderTable({
+    if (is.null(result_logistic$stability_pi)) return(NULL)
+    data.frame(
+      Variable  = names(result_logistic$stability_pi),
+      Stability = round(as.numeric(result_logistic$stability_pi), 3),
+      row.names = NULL
+    )
+  })
+  
+  # Confusion matrix & metrics for best plausible model
+  cm_results <- reactive({
+    if (is.null(result_logistic$plausible) ||
+        nrow(result_logistic$plausible) == 0) {
+      return(NULL)
+    }
+    
+    best_key <- result_logistic$plausible$key[1]
+    best_idx <- as.integer(strsplit(best_key, ",")[[1]])
+    
+    X_best <- X_logistic[, best_idx, drop = FALSE]
+    df_logistic <- data.frame(y = y_logistic, X_best)
+    
+    fit_best <- glm(y ~ ., data = df_logistic, family = binomial())
+    
+    confusion_metrics(
+      fit    = fit_best,
+      y      = y_logistic,
+      cutoff = 0.5
+    )
+  })
+  
+  output$logistic_cm <- renderTable({
+    res <- cm_results()
+    if (is.null(res)) return(NULL)
+    res$confusion_matrix
+  }, rownames = TRUE)
+  
+  output$logistic_metrics <- renderTable({
+    res <- cm_results()
+    if (is.null(res)) return(NULL)
+    data.frame(
+      Metric = names(res$metrics),
+      Value  = round(as.numeric(res$metrics), 4),
+      row.names = NULL
+    )
+  })
+  
+  output$logistic_cm_plot <- renderPlot({
+    res <- cm_results()
+    if (is.null(res)) return(NULL)
+    cm <- res$confusion_matrix
+    
+    par(mar = c(5, 5, 4, 2))
+    
+    plot(1, 1, type = "n", xlim = c(0, 2), ylim = c(0, 2),
+         xlab = "Predicted", ylab = "Actual",
+         main = "Confusion Matrix (Best Plausible Model)",
+         xaxt = "n", yaxt = "n", bty = "n")
+    
+    rect(c(0, 1), c(0, 0), c(1, 2), c(1, 1),
+         col = c("lightgreen", "lightcoral"))
+    rect(c(0, 1), c(1, 1), c(1, 2), c(2, 2),
+         col = c("lightcoral", "lightgreen"))
+    
+    text(0.5, 0.5, paste0("TN\n", cm[1, 1]), cex = 1.5, font = 2)
+    text(1.5, 0.5, paste0("FP\n", cm[1, 2]), cex = 1.5, font = 2)
+    text(0.5, 1.5, paste0("FN\n", cm[2, 1]), cex = 1.5, font = 2)
+    text(1.5, 1.5, paste0("TP\n", cm[2, 2]), cex = 1.5, font = 2)
+    
+    axis(1, at = c(0.5, 1.5), labels = c("0", "1"))
+    axis(2, at = c(0.5, 1.5), labels = c("0", "1"))
+  })
 }
 
+shinyApp(ui, server)
