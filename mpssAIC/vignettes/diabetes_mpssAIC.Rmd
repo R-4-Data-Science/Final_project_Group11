@@ -27,10 +27,6 @@ knitr::opts_chunk$set(
   warning = FALSE
 )
 
-# Do NOT install packages inside a vignette.
-# Assume 'care' is available (it's listed in Suggests in DESCRIPTION).
-# If it's missing, the user can install it manually.
-
 if (!requireNamespace("care", quietly = TRUE)) {
   stop("The vignette requires the 'care' package. Please install it with install.packages('care').")
 }
@@ -40,12 +36,7 @@ library(care)
 set.seed(123)
 
 ```
-
-Introduction
-This vignette demonstrates the use of the mpssAIC package on the
-efron2004 diabetes dataset (Efron et al., 2004), available in the care package.
-We illustrate multi-path model selection, variable stability, and plausible model evaluation.
-
+# Data and train/test split
 ```{r}
 data(efron2004)
 X <- as.data.frame(efron2004$x)
@@ -53,19 +44,24 @@ y <- as.numeric(efron2004$y)
 
 n <- nrow(X)
 idx_train <- sample(seq_len(n), size = floor(0.8*n))
-idx_test <- setdiff(seq_len(n), idx_train)
+idx_test  <- setdiff(seq_len(n), idx_train)
 
 X_train <- X[idx_train, ]
 y_train <- y[idx_train]
 
-X_test <- X[idx_test, ]
-y_test <- y[idx_test]
+X_test  <- X[idx_test, ]
+y_test  <- y[idx_test]
 
 ```
 
+In the sections below we:
+
+- Build a multi-path forward-selection forest of models using `build_paths()`
+- Estimate predictor stability across bootstrap samples using `stability()`
+- Construct a plausible Rashomon set using `plausible_models()`
+- Evaluate the best plausible model on a held-out test set using RMSE
 
 Build multi-path forward selection forest
-
 ```{r}
 forest <- build_paths(
 X_train, y_train,
