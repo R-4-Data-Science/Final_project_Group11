@@ -1,11 +1,24 @@
 ---
-title: "Multi-Path AIC Model Selection on Diabetes Data"
+title: "Multi-Path AIC and Rashomon Sets on the Efron Diabetes Dataset"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Diabetes Example}
+  %\VignetteIndexEntry{Multi-Path AIC and Rashomon Sets on the Efron Diabetes Dataset}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+In this vignette, we use the **mpssAIC** pipeline on the `efron2004` diabetes dataset  
+(Efron et al., 2004) to illustrate:
+
+- multi-path AIC model selection,
+- construction of a *Rashomon set* of plausible models,
+- assessment of variable stability via bootstrap resampling, and
+- evaluation of predictive performance using test-set RMSE.
+
+The goal is to show how the exported functions  
+`build_paths()`, `stability()`, and `plausible_models()`  
+work together to reveal multiple well-supported models, rather than relying on a single greedy solution.
+
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -120,7 +133,18 @@ if (nrow(plaus) > 0) {
   rmse
 }
 ```
-Conclusion
-This vignette demonstrates how the mpssAIC package can be used to explore a
-Rashomon set of models, quantify variable stability, and select a set of
-plausible models with similar support in the data.
+
+## Conclusion
+
+In this example, the most plausible model in the Rashomon set was a simple one-variable model,  
+which achieved a test-set RMSE of approximately 1.0.
+
+This demonstrates two important ideas behind the **multi-path AIC** workflow:
+
+1. Multiple models can have nearly identical AIC, forming a *Rashomon set* of explanations.  
+2. Combining AIC with **stability** and **out-of-sample RMSE** helps identify models that are both  
+   interpretable and well-supported by the data.
+
+The `mpssAIC` package provides a principled way to explore model uncertainty and select robust,  
+predictive models without relying on a single stepwise path.
+
