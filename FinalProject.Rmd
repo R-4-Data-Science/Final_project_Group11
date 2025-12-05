@@ -1486,3 +1486,8 @@ cat("Plausible models for the linear example not found; run the linear pipeline 
 
 
 ```
+
+# Reference {.unnumbered}
+* <https://chatgpt.com/share/692f4a94-1f5c-8005-9364-6432a0e4c961>
+* <https://chatgpt.com/share/6933185d-0160-8005-9a35-d5432f76e548> 
+* <>
