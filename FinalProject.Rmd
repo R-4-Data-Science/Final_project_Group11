@@ -4,7 +4,7 @@ subtitle: |
   Final Project Report – Statistical Programming with R
   <br>
   Group 11
-  [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11t)
+  [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11)
   <span style="font-size:70%"><https://github.com/R-4-Data-Science/Final_project_Group11></span>
   <br>mpssAIC Repo
   [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC)
@@ -1110,6 +1110,21 @@ print(params_df)
 
 ```
 
+Vignette, Testing, and Reproducibility
+```{r}
+### Package vignette
+
+#The `mpssAIC` package includes a vignette that demonstrates the full workflow on a real dataset (diabetes progression).  
+#The vignette is stored in `mpssAIC/vignettes/` and can be accessed after installing the package via:
+
+
+browseVignettes("mpssAIC")
+library(testthat)
+test_package("mpssAIC")
+
+```
+
+
 ## **Vignette: Real-World Application**
 
 This HTML report demonstrates the methodology using synthetic data. The **mpssAIC** 
@@ -1198,7 +1213,7 @@ implementation logic, and final verification were performed by the authors.
 **Repository:** https://github.com/R-4-Data-Science/Final_project_Group11
 
 
-# this is the bonus PART
+# Bonus: Additional Visualizations and Diagnostics
 Bonus 1 – Branching plot
 ```{r}
 # -------------------------------------------------------------
