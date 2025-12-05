@@ -1185,3 +1185,147 @@ with assistance from an AI language model (https://claude.ai/chat/60acf8a1-754e-
 implementation logic, and final verification were performed by the authors.
 
 **Repository:** https://github.com/R-4-Data-Science/Final_project_Group11
+
+
+# this is the bonus PART
+Bonus 1 – Branching plot
+```{r}
+# -------------------------------------------------------------
+
+# BONUS VISUALIZATION 1
+
+# Branching complexity of multi-path forward selection (linear)
+
+# -------------------------------------------------------------
+
+# Uses: mp_full_linear created earlier from the linear example.
+
+# Shows how many models are "alive" at each forward-selection step.
+
+# -------------------------------------------------------------
+
+if (exists("mp_full_linear")) {
+models_per_step <- sapply(mp_full_linear$step_models, length)
+steps <- seq_along(models_per_step)
+
+par(mar = c(5, 5, 4, 2))
+plot(
+steps, models_per_step,
+type = "b",
+xlab = "Forward-selection step (k)",
+ylab = "Number of models",
+main = "Branching of Multi-Path Forward Selection (Linear Example)",
+lwd  = 2,
+pch  = 19
+)
+grid()
+
+cat(
+"\nBonus visualization 1: Branching complexity\n",
+"------------------------------------------------------------\n",
+"This plot tracks how many candidate models survive at each\n",
+"forward-selection step. A flat line would correspond to a\n",
+"single greedy path, while growth indicates that the algorithm\n",
+"is exploring multiple near-best paths in parallel.\n\n"
+)
+
+} else {
+cat("Object 'mp_full_linear' not found; run the linear pipeline first.\n")
+}
+
+```
+
+
+Bonus 2 – Jaccard overlap heatmap
+```{r}
+
+# ------------------------------------------------------------------
+
+# BONUS VISUALIZATION 2
+
+# Jaccard similarity heatmap for plausible models (linear)
+
+# ------------------------------------------------------------------
+
+# Uses: result_linear$plausible and mp_full_linear$var_names.
+
+# Builds a model-by-model Jaccard similarity matrix based on the
+
+# variables in each plausible model and displays it as a heatmap.
+
+# ------------------------------------------------------------------
+
+if (exists("result_linear") &&
+!is.null(result_linear$plausible) &&
+nrow(result_linear$plausible) > 0 &&
+exists("mp_full_linear")) {
+
+plaus     <- result_linear$plausible
+var_names <- mp_full_linear$var_names
+
+model_keys <- plaus$key
+M <- length(model_keys)
+P <- length(var_names)
+
+# Incidence matrix: rows = models, cols = variables
+
+incidence <- matrix(0, nrow = M, ncol = P)
+colnames(incidence) <- var_names
+rownames(incidence) <- paste0("M", seq_len(M))
+
+for (i in seq_len(M)) {
+idx <- as.integer(strsplit(model_keys[i], ",")[[1]])
+incidence[i, idx] <- 1
+}
+
+# Jaccard similarity between models
+
+jaccard <- matrix(0, nrow = M, ncol = M)
+rownames(jaccard) <- rownames(incidence)
+colnames(jaccard) <- rownames(incidence)
+
+for (i in seq_len(M)) {
+for (j in seq_len(M)) {
+inter <- sum(incidence[i, ] & incidence[j, ])
+union <- sum(incidence[i, ] | incidence[j, ])
+jaccard[i, j] <- if (union == 0) 0 else inter / union
+}
+}
+
+if (M > 1) {
+# Slightly nicer color scale (still base R)
+pal <- colorRampPalette(c("white", "gold", "orange", "red", "darkred"))(50)
+heatmap(
+  jaccard,
+  Rowv   = NA,
+  Colv   = NA,
+  scale  = "none",
+  col    = pal,
+  main   = "Jaccard Similarity of Plausible Models (Linear Example)",
+  xlab   = "Model",
+  ylab   = "Model",
+  margins = c(6, 6)
+)
+
+cat(
+  "\nBonus visualization 2: Jaccard overlap heatmap\n",
+  "------------------------------------------------------------\n",
+  "Each cell shows the Jaccard similarity between a pair of\n",
+  "plausible models (intersection / union of their variable sets).\n",
+  "Dark cells (near 1) indicate highly overlapping models, while\n",
+  "light cells (near 0) correspond to models that use mostly\n",
+  "different predictors. This makes it easy to see whether the\n",
+  "plausible set is redundant or genuinely diverse.\n\n"
+)
+
+} else {
+cat("Only one plausible model found; Jaccard heatmap is not informative.\n")
+}
+
+} else {
+cat("Plausible models for the linear example not found; run the linear pipeline first.\n")
+}
+
+
+
+```
