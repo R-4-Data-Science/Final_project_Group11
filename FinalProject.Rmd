@@ -102,6 +102,7 @@ stability() – Resampling-based variable stability (Algorithm 2)
 
 plausible_models() – Plausible model selection via AIC window + stability (Algorithm 3)
 
+
 **Note:** The examples in this HTML report define and call internal helper functions
 `multi_path_forward()`, `compute_stability()`, and `select_plausible_models()`
 directly inside the R Markdown file, so they are available when this document
@@ -901,10 +902,9 @@ print(round(result_linear$stability_pi, 3))
 ```
 
 
-Complete Example – Logistic Regression (Synthetic Binary Data)
+## Logistic Regression (Synthetic Binary Data)
 
 ```{r example-Logistic}
-## Complete Example – Logistic Regression (Synthetic Binary Data)
 
 cat("\n\n")
 cat(strrep("#", 70), "\n")
@@ -1071,6 +1071,7 @@ A variable that appears only occasionally in resampled datasets is likely unstab
 
 AIC window + stability threshold.
 Models within 2 AIC units of the best model are often statistically indistinguishable. By combining an AIC window (Δ) with a stability threshold (τ), we obtain a Rashomon set of models that are both high-quality and robust.
+
 
 # Parameter Guidance
 ```{r}
@@ -1339,3 +1340,8 @@ cat("Plausible models for the linear example not found; run the linear pipeline 
 
 
 ```
+
+# Reference {.unnumbered}
+* <https://chatgpt.com/share/692f4a94-1f5c-8005-9364-6432a0e4c961>
+* <https://chatgpt.com/share/6933185d-0160-8005-9a35-d5432f76e548> 
+* <>
