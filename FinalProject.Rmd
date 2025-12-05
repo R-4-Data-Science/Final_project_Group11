@@ -1110,20 +1110,6 @@ print(params_df)
 
 ```
 
-Vignette, Testing, and Reproducibility
-```{r}
-### Package vignette
-
-#The `mpssAIC` package includes a vignette that demonstrates the full workflow on a real dataset (diabetes progression).  
-#The vignette is stored in `mpssAIC/vignettes/` and can be accessed after installing the package via:
-
-
-browseVignettes("mpssAIC")
-library(testthat)
-test_package("mpssAIC")
-
-```
-
 
 ## **Vignette: Real-World Application**
 
