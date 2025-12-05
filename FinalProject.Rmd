@@ -102,10 +102,20 @@ stability() – Resampling-based variable stability (Algorithm 2)
 
 plausible_models() – Plausible model selection via AIC window + stability (Algorithm 3)
 
-**Note:** The implementations shown in this HTML report use internal function names 
-(`multi_path_forward()`, `compute_stability()`, `select_plausible_models()`) for 
-reproducibility. The installed package exports these with the assignment-specified 
-names (`build_paths()`, `stability()`, `plausible_models()`) as wrapper functions.
+**Note:** The examples in this HTML report define and call internal helper functions
+`multi_path_forward()`, `compute_stability()`, and `select_plausible_models()`
+directly inside the R Markdown file, so they are available when this document
+is knitted.
+
+In the installed **mpssAIC** package, the *user-facing* functions are the
+assignment-specified wrappers:
+
+- `build_paths()`        – multi-path forward selection  
+- `stability()`          – resampling-based variable stability  
+- `plausible_models()`   – AIC + stability-based final model selection  
+
+These are the functions that should be used in external code such as scripts,
+vignettes, and Shiny apps after `library(mpssAIC)`.
 
 The code chunks below present a clean, self-contained implementation of the same methods for reproducibility within this HTML report.
 
