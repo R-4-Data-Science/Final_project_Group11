@@ -9,7 +9,7 @@ subtitle: |
   <br>mpssAIC Repo
   [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC)
   <span style="font-size:70%"><https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC></span>
-author: "Mark Philip, Prince Mensah Ansah, and Jonathan Ng"
+author: "Mark Philip Castillo, Prince Mensah Ansah, and Jonathan Ng"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -102,6 +102,11 @@ stability() – Resampling-based variable stability (Algorithm 2)
 
 plausible_models() – Plausible model selection via AIC window + stability (Algorithm 3)
 
+**Note:** The implementations shown in this HTML report use internal function names 
+(`multi_path_forward()`, `compute_stability()`, `select_plausible_models()`) for 
+reproducibility. The installed package exports these with the assignment-specified 
+names (`build_paths()`, `stability()`, `plausible_models()`) as wrapper functions.
+
 The code chunks below present a clean, self-contained implementation of the same methods for reproducibility within this HTML report.
 
 Synthetic Example Data
@@ -110,60 +115,7 @@ The assignment requires synthetic examples in the HTML submission. To ensure ful
 
 A Gaussian (linear regression) example
 
-```{r}
-set.seed(1)
-n <- 120; p <- 8
-X <- matrix(rnorm(n*p), n, p)
-beta <- c(2, -1.5, 0, 0, 1, rep(0, p-5))
-y <- X %*% beta + rnorm(n, sd = 1)
-colnames(X) <- paste0("x", 1:p)
-df <- as.data.frame(cbind(y, X))
-
-# Fit a few single-step candidates to illustrate AIC comparisons:
-aic_empty <- AIC(lm(y ~ 1, data = df))
-cand <- lapply(1:p, function(j) lm(as.formula(paste0("y ~ ", colnames(X)[j])), data = df))
-aics <- sapply(cand, AIC)
-data.frame(variable = colnames(X), AIC = aics)[order(aics), ][1:8, ]
-```
-
-##  Reproducing results using `mpssAIC`
-```{r}
-
-forest <- build_paths(X = X, y = as.numeric(y), family = "gaussian", K = min(ncol(X), 10), eps = 1e-6, delta = 1, L = 50)
-
-stab <- stability(X = X, y = as.numeric(y), B = 50, resample = "bootstrap", family = "gaussian", K = 10, eps = 1e-6, delta = 1, L = 50)
-
-plaus <- plausible_models(forest, pi = stab, Delta = 2, tau = 0.6)
-plaus
-```
-
-```{r}
-data.frame(variable = forest$var_names, AIC = forest$step_AICs)[order(forest$step_AICs), ][1:8, ]
-```
-
-
-
 A Binomial (logistic regression) example
-```{r}
-set.seed(2)
-n <- 200; p <- 6
-Xb <- matrix(rnorm(n*p), n, p)
-linpred <- 1.2*Xb[,1] - 1*Xb[,2] + 0.8*Xb[,5]
-prob <- 1 / (1 + exp(-linpred))
-ybin <- rbinom(n, 1, prob)
-colnames(Xb) <- paste0("x", 1:p)
-dfb <- as.data.frame(cbind(y = ybin, Xb))
-
-# Compare intercept-only vs. adding one variable by AIC:
-fit0 <- glm(y ~ 1, family = binomial(), data = dfb)
-aic0 <- AIC(fit0)
-fits1 <- lapply(1:p, function(j) glm(as.formula(paste0("y ~ ", colnames(Xb)[j])),
-                                     family = binomial(), data = dfb))
-aics1 <- sapply(fits1, AIC)
-head(data.frame(variable = colnames(Xb), AIC = aics1)[order(aics1), ], 5)
-```
-
-
 
 
 
@@ -713,7 +665,7 @@ select_plausible_models <- function(
 
 Provide a convenience function to compute confusion matrix and standard metrics at cutoff 0.5 (prevalence, accuracy, sensitivity, specificity, FDR, DOR).
 
-``` r
+``` {r}
 #' (Optional) Confusion metrics for logistic models
 #'
 #' Computes confusion matrix and basic metrics at cutoff 0.5:
@@ -942,37 +894,158 @@ print(round(result_linear$stability_pi, 3))
 Complete Example – Logistic Regression (Synthetic Binary Data)
 
 ```{r example-Logistic}
+## Complete Example – Logistic Regression (Synthetic Binary Data)
+
 cat("\n\n")
 cat(strrep("#", 70), "\n")
 cat("COMPLETE EXAMPLE: LOGISTIC REGRESSION (Synthetic Binary Data)\n")
 cat(strrep("#", 70), "\n\n")
 
 result_logistic <- multi_path_AIC_pipeline(
-X             = X_logistic,
-y             = y_logistic,
-model_type    = "binomial",
-K             = NULL,
-eps           = 1e-6,
-delta         = 2,
-L             = 50,
-B             = 20,
-resample_type = "bootstrap",
-m             = NULL,
-Delta         = 2,
-tau           = 0.6
+  X             = X_logistic,
+  y             = y_logistic,
+  model_type    = "binomial",
+  K             = NULL,
+  eps           = 1e-6,
+  delta         = 2,
+  L             = 50,
+  B             = 20,
+  resample_type = "bootstrap",
+  m             = NULL,
+  Delta         = 2,
+  tau           = 0.6
 )
 
 cat("\n### FINAL RESULTS: LOGISTIC REGRESSION ###\n\n")
 cat("Number of plausible models:", nrow(result_logistic$plausible), "\n\n")
 
 final_table_log <- result_logistic$plausible[
-, c("AIC", "AIC_diff", "size", "vars", "avg_stability")
+  , c("AIC", "AIC_diff", "size", "vars", "avg_stability")
 ]
 rownames(final_table_log) <- NULL
 print(final_table_log)
 
 cat("\n### Stability Scores ###\n")
 print(round(result_logistic$stability_pi, 3))
+
+# ============================================================================
+# NEW SECTION: Confusion Matrix and Classification Metrics
+# ============================================================================
+
+cat("\n\n")
+cat(strrep("=", 70), "\n")
+cat("CLASSIFICATION PERFORMANCE EVALUATION\n")
+cat(strrep("=", 70), "\n\n")
+
+if (nrow(result_logistic$plausible) > 0) {
+  # Extract best plausible model
+  best_key <- result_logistic$plausible$key[1]
+  best_vars <- result_logistic$plausible$vars[1]
+  best_idx <- as.integer(strsplit(best_key, ",")[[1]])
+  
+  cat("Best Plausible Model:", best_vars, "\n\n")
+  
+  # Fit the best model
+  X_best <- X_logistic[, best_idx, drop = FALSE]
+  df_logistic <- data.frame(y = y_logistic, X_best)
+  fit_best_logistic <- glm(y ~ ., data = df_logistic, family = binomial())
+  
+  # Compute confusion matrix and metrics
+  cm_results <- confusion_metrics(
+    fit = fit_best_logistic,
+    y = y_logistic,
+    cutoff = 0.5
+  )
+  
+  cat("### Confusion Matrix (Cutoff = 0.5) ###\n\n")
+  print(cm_results$confusion_matrix)
+  
+  cat("\n### Classification Metrics ###\n\n")
+  metrics_df <- data.frame(
+    Metric = names(cm_results$metrics),
+    Value = round(cm_results$metrics, 4)
+  )
+  rownames(metrics_df) <- NULL
+  print(metrics_df)
+  
+  # Visual representation
+  cat("\n### Key Performance Indicators ###\n\n")
+  cat(sprintf("  Accuracy:    %.2f%% (%.0f/%.0f correct)\n", 
+              cm_results$metrics["accuracy"] * 100,
+              sum(diag(cm_results$confusion_matrix)),
+              sum(cm_results$confusion_matrix)))
+  
+  cat(sprintf("  Sensitivity: %.2f%% (True Positive Rate)\n", 
+              cm_results$metrics["sensitivity"] * 100))
+  
+  cat(sprintf("  Specificity: %.2f%% (True Negative Rate)\n", 
+              cm_results$metrics["specificity"] * 100))
+  
+  cat(sprintf("  FDR:         %.2f%% (False Discovery Rate)\n", 
+              cm_results$metrics["FDR"] * 100))
+  
+  cat(sprintf("  DOR:         %.2f (Diagnostic Odds Ratio)\n", 
+              cm_results$metrics["DOR"]))
+  
+  # Interpretation
+  cat("\n### Interpretation ###\n\n")
+  cat("The confusion matrix shows the model's classification performance:\n")
+  cat("- True Negatives (TN):", cm_results$confusion_matrix[1,1], "\n")
+  cat("- False Positives (FP):", cm_results$confusion_matrix[1,2], "\n")
+  cat("- False Negatives (FN):", cm_results$confusion_matrix[2,1], "\n")
+  cat("- True Positives (TP):", cm_results$confusion_matrix[2,2], "\n\n")
+  
+  if (cm_results$metrics["accuracy"] > 0.8) {
+    cat("The model demonstrates strong classification performance (>80% accuracy).\n")
+  } else if (cm_results$metrics["accuracy"] > 0.7) {
+    cat("The model shows acceptable classification performance (70-80% accuracy).\n")
+  } else {
+    cat("The model may need improvement (accuracy <70%).\n")
+  }
+  
+  # Optional: Plot confusion matrix as heatmap
+  cat("\n")
+  library(graphics)
+  
+  # Create a simple confusion matrix visualization
+  cm_matrix <- cm_results$confusion_matrix
+  par(mar = c(5, 5, 4, 2))
+  
+  # Normalize for color scaling
+  cm_prop <- cm_matrix / sum(cm_matrix)
+  
+  # Create color palette
+  colors <- c("white", "lightblue", "blue", "darkblue")
+  color_breaks <- seq(0, max(cm_prop), length.out = length(colors) + 1)
+  
+  # Simple text-based display
+  plot(1, 1, type = "n", xlim = c(0, 2), ylim = c(0, 2), 
+       xlab = "Predicted", ylab = "Actual",
+       main = "Confusion Matrix Visualization",
+       xaxt = "n", yaxt = "n", bty = "n")
+  
+  # Add grid
+  rect(c(0, 1), c(0, 0), c(1, 2), c(1, 1), 
+       col = c("lightgreen", "lightcoral"))
+  rect(c(0, 1), c(1, 1), c(1, 2), c(2, 2), 
+       col = c("lightcoral", "lightgreen"))
+  
+  # Add values
+  text(0.5, 0.5, paste0("TN\n", cm_matrix[1,1]), cex = 1.5, font = 2)
+  text(1.5, 0.5, paste0("FP\n", cm_matrix[1,2]), cex = 1.5, font = 2)
+  text(0.5, 1.5, paste0("FN\n", cm_matrix[2,1]), cex = 1.5, font = 2)
+  text(1.5, 1.5, paste0("TP\n", cm_matrix[2,2]), cex = 1.5, font = 2)
+  
+  # Add axis labels
+  axis(1, at = c(0.5, 1.5), labels = c("0", "1"))
+  axis(2, at = c(0.5, 1.5), labels = c("0", "1"))
+  
+} else {
+  cat("No plausible models found - cannot compute confusion matrix.\n")
+}
+
+cat("\n")
+cat(strrep("=", 70), "\n\n")
 
 ```
 
@@ -1026,35 +1099,89 @@ print(params_df)
 
 ```
 
+## **Vignette: Real-World Application**
 
+This HTML report demonstrates the methodology using synthetic data. The **mpssAIC** 
+package includes a comprehensive vignette that applies these methods to the 
+**diabetes progression dataset** (Efron et al., 2004) from the `care` package.
+
+The vignette includes:
+
+- Train/test split on real data
+- Complete pipeline workflow
+- Test set evaluation with RMSE
+- Comparison with full model
+- Parameter justification
+- Professional visualization
+
+To view the vignette after installing the package:
+```{r eval=FALSE}
+library(mpssAIC)
+browseVignettes("mpssAIC")
+# Or directly:
+vignette("diabetes_mpssAIC", package = "mpssAIC")
+```
+
+**Location:** `mpssAIC/vignettes/diabetes_mpssAIC.Rmd`
 
 # Conclusion
 
-This report demonstrates a complete, reproducible implementation of the Multi-Path Stepwise Model Selection with AIC framework:
 
-lgorithm 1: Multi-path forward selection building a forest of models
+This report demonstrates a complete, reproducible implementation of the Multi-Path 
+Stepwise Model Selection with AIC framework:
 
-Algorithm 2: Stability estimation via bootstrap resampling
+**Core Algorithms:**
 
-Algorithm 3: Plausible model selection combining AIC and stability
+- **Algorithm 1:** Multi-path forward selection building a forest of models
+- **Algorithm 2:** Stability estimation via bootstrap resampling
+- **Algorithm 3:** Plausible model selection combining AIC and stability
+- **Algorithm 4:** Integrated pipeline for both Gaussian and Binomial models
 
-Algorithm 4: Integrated pipeline for both Gaussian and Binomial models
+**Package Features:**
 
-Synthetic examples: Linear and logistic regression
+- Production-ready R package: `mpssAIC`
+- Installable from GitHub with full documentation
+- Comprehensive vignette on diabetes progression data
+- Exported functions: `build_paths()`, `stability()`, `plausible_models()`
+- Helper function: `confusion_metrics()` for classification evaluation
 
-Package implementation: mpssAIC, installable from GitHub with a vignette
+**Demonstrations:**
 
-The final plausible models represent a principled compromise between statistical fit (low AIC) and robustness (high stability), providing multiple trustworthy model options rather than a single brittle solution.
+1. **Synthetic Examples (This HTML):**
+   - Linear regression (Gaussian) with stability visualization
+   - Logistic regression (Binomial) with confusion matrix and metrics
 
-For further extensions, one could:
+2. **Real-World Application (Package Vignette):**
+   - Diabetes progression dataset (442 patients, 10 predictors)
+   - Train/test split evaluation
+   - Test set RMSE: demonstrates predictive performance
+   - Comparison with full model: shows parsimony benefit
 
-Increase B (e.g., 50–100) for more precise stability estimates
+**Key Insights:**
 
-Perform sensitivity analysis over Δ and τ
+The final plausible models represent a principled compromise between statistical 
+fit (low AIC) and robustness (high stability), providing multiple trustworthy 
+model options rather than a single brittle solution.
 
-Add confusion matrices and ROC curves for logistic models
+**Advantages Over Traditional Stepwise Selection:**
 
-Apply the pipeline to real datasets and compare against LASSO or other modern methods.
+- Explores multiple near-optimal paths (avoids greedy trap)
+- Quantifies variable stability via resampling
+- Returns "Rashomon set" of competitive models
+- More robust model selection under data perturbation
 
-Portions of the documentation, code refinement, and explanatory text were produced with assistance from an AI language model (ChatGPT). All algorithm design decisions, implementation logic, and final verification were performed by the authors. Link: 
+**Future Extensions:**
 
+- Increase B (e.g., 50–100) for more precise stability estimates
+- Perform sensitivity analysis over Δ and τ
+- Extend to Cox regression for survival analysis
+- Compare performance against LASSO and elastic net
+- Add automatic cross-validation for parameter tuning
+
+**Reproducibility Note:**
+
+Portions of the documentation, code refinement, and explanatory text were produced 
+with assistance from an AI language model (ChatGPT). All algorithm design decisions, 
+implementation logic, and final verification were performed by the authors.
+
+**Repository:** https://github.com/R-4-Data-Science/Final_project_Group11
