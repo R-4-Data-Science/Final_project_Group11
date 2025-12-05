@@ -1126,16 +1126,6 @@ The vignette includes:
 - Parameter justification
 - Professional visualization
 
-To view the vignette after installing the package:
-```{r eval=FALSE}
-library(mpssAIC)
-browseVignettes("mpssAIC")
-# Or directly:
-vignette("diabetes_mpssAIC", package = "mpssAIC")
-```
-
-**Location:** `mpssAIC/vignettes/diabetes_mpssAIC.Rmd`
-
 # Conclusion
 
 
