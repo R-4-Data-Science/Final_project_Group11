@@ -17,6 +17,7 @@
   <li><strong>Algorithm 3 – Plausible Model Selection</strong><br>Combines AIC quality and variable stability to identify a final set of plausible and robust models.</li>
 
   <li><strong>Algorithm 4 – Full Pipeline</strong><br>Integrates Algorithms 1–3 into a single reproducible model-discovery workflow.</li>
+  <li><strong>Algorithm 5 – Confusion Metrics</strong><br>Provides a convenience function to compute confusion matrix and standard metrics.</li>
 </ul>
 
 <h2>R Package: <code>mpssAIC</code></h2>
@@ -61,6 +62,8 @@ library(mpssAIC)
 <h2>Example Usage</h2>
 
 <pre>
+library(mpssAIC)
+
 set.seed(1)
 X <- data.frame(
   x1 = rnorm(50),
