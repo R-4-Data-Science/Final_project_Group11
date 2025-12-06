@@ -525,7 +525,7 @@ cat("\n### RUNNING ALGORITHM 2: STABILITY (LINEAR, Synthetic) ###\n\n")
 stability_pi_linear <- compute_stability(
 X = X_linear, y = y_linear,
 model_type = "gaussian",
-B = 20, # reduced for knitting speed; use 50+ in final
+B = 50, # reduced for knitting speed; use 50+ in final
 resample_type = "bootstrap",
 K = NULL,
 eps = 1e-6,
@@ -886,7 +886,7 @@ K = NULL, # min(p, 10)
 eps = 1e-6,
 delta = 2,
 L = 50,
-B = 20, # reduced for knitting speed; 50+ recommended
+B = 50, # reduced for knitting speed; 50+ recommended
 resample_type = "bootstrap",
 m = NULL,
 Delta = 2,
