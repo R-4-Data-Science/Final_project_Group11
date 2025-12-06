@@ -53,3 +53,7 @@
         font-weight: inherit;
       }
       
+span.version,
+.vignette span.version,
+.package-version {
+  display: none !important;

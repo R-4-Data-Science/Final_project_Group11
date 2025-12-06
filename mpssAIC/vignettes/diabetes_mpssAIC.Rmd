@@ -31,6 +31,12 @@ if (!requireNamespace("care", quietly = TRUE)) {
   stop("The vignette requires the 'care' package. Please install it with install.packages('care').")
 }
 
+devtools::install_github(
+  "R-4-Data-Science/Final_project_Group11",
+  subdir = "mpssAIC",
+  build_vignettes = TRUE
+)
+
 library(mpssAIC)
 library(care)
 set.seed(123)

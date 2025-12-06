@@ -9,6 +9,9 @@ subtitle: |
   <br>mpssAIC Repo
   [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC)
   <span style="font-size:70%"><https://github.com/R-4-Data-Science/Final_project_Group11/tree/main/mpssAIC></span>
+  <br>Vignette Report
+  <img width="15" height="15" src="https://img.icons8.com/office/40/link.png" alt="link"/>
+  <span style="font-size:70%"><https://raw.githack.com/R-4-Data-Science/Final_project_Group11/main/mpssAIC/vignettes/diabetes_mpssAIC.html></span>
 author: "Mark Philip Castillo, Prince Mensah Ansah, and Jonathan Ng"
 date: "`r Sys.Date()`"
 output:
@@ -1157,6 +1160,9 @@ Stepwise Model Selection with AIC framework:
    - Train/test split evaluation
    - Test set RMSE: demonstrates predictive performance
    - Comparison with full model: shows parsimony benefit
+   
+   For the report on Vignette, please read the other separate HTML file `diabetes_mpssAIC.html` due to its length. The report can also be accessed at <https://raw.githack.com/R-4-Data-Science/Final_project_Group11/main/mpssAIC/vignettes/diabetes_mpssAIC.html>.
+   
 
 **Key Insights:**
 

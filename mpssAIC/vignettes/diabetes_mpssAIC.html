@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Multi-Path AIC and Rashomon Sets on the Efron Diabetes Dataset</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Multi-Path AIC and Rashomon Sets on the
+Efron Diabetes Dataset</h1>
+
+
+
+<p>In this vignette, we use the <strong>mpssAIC</strong> pipeline on the
+<code>efron2004</code> diabetes dataset<br />
+(Efron et al., 2004) to illustrate:</p>
+<ul>
+<li>multi-path AIC model selection,</li>
+<li>construction of a <em>Rashomon set</em> of plausible models,</li>
+<li>assessment of variable stability via bootstrap resampling, and</li>
+<li>evaluation of predictive performance using test-set RMSE.</li>
+</ul>
+<p>The goal is to show how the exported functions<br />
+<code>build_paths()</code>, <code>stability()</code>, and
+<code>plausible_models()</code><br />
+work together to reveal multiple well-supported models, rather than
+relying on a single greedy solution.</p>
+<div id="data-and-traintest-split" class="section level1">
+<h1>Data and train/test split</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(efron2004)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(efron2004<span class="sc">$</span>x)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(efron2004<span class="sc">$</span>y)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>idx_train <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(n), <span class="at">size =</span> <span class="fu">floor</span>(<span class="fl">0.8</span><span class="sc">*</span>n))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>idx_test  <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(n), idx_train)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> X[idx_train, ]</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> y[idx_train]</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>X_test  <span class="ot">&lt;-</span> X[idx_test, ]</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>y_test  <span class="ot">&lt;-</span> y[idx_test]</span></code></pre></div>
+<p>In the sections below we:</p>
+<ul>
+<li>Build a multi-path forward-selection forest of models using
+<code>build_paths()</code></li>
+<li>Estimate predictor stability across bootstrap samples using
+<code>stability()</code></li>
+<li>Construct a plausible Rashomon set using
+<code>plausible_models()</code></li>
+<li>Evaluate the best plausible model on a held-out test set using
+RMSE</li>
+</ul>
+<p>Build multi-path forward selection forest</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>forest <span class="ot">&lt;-</span> <span class="fu">build_paths</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>X_train, y_train,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="at">family =</span> <span class="st">&quot;gaussian&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="at">K =</span> <span class="dv">12</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="at">eps =</span> <span class="fl">1e-6</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="at">delta =</span> <span class="dv">2</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="at">L =</span> <span class="dv">40</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===</code></pre>
+<p>Compute stability</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>pi_vec <span class="ot">&lt;-</span> <span class="fu">stability</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>X_train, y_train,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="at">family =</span> <span class="st">&quot;gaussian&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="at">B =</span> <span class="dv">40</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="at">resample =</span> <span class="st">&quot;bootstrap&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="at">K =</span> <span class="dv">12</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="at">eps =</span> <span class="fl">1e-6</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="at">delta =</span> <span class="dv">2</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="at">L =</span> <span class="dv">40</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===
+## Step 1 : processing 1 parent model(s)...
+##   Step 1 produced 1 unique model(s) after dedup/cap.
+## Step 2 : processing 1 parent model(s)...
+## No further improvement. Stopping.
+## 
+## === Algorithm 1 Complete ===</code></pre>
+<p>Plausible models</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>plaus <span class="ot">&lt;-</span> <span class="fu">plausible_models</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>forest,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">pi =</span> pi_vec,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">Delta =</span> <span class="dv">2</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">tau =</span> <span class="fl">0.6</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>plaus</span></code></pre></div>
+<pre><code>##   key      AIC AIC_diff size vars avg_stability
+## 1   1 770.3141        0    1    x             1</code></pre>
+<p>Evaluate best model on test data</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(plaus) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="co"># extract indices of variables in the best plausible model</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  best_key <span class="ot">&lt;-</span> plaus<span class="sc">$</span>key[<span class="dv">1</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  best_idx <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">strsplit</span>(best_key, <span class="st">&quot;,&quot;</span>)[[<span class="dv">1</span>]])</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="co"># subset training and test predictors</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  X_train_sub <span class="ot">&lt;-</span> X_train[, best_idx, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  X_test_sub  <span class="ot">&lt;-</span> X_test[,  best_idx, drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="co"># build data frames for modeling</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  df_train <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y_train, X_train_sub)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  df_test  <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X_test_sub)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="co"># fit Gaussian model on training data</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df_train, <span class="at">family =</span> <span class="fu">gaussian</span>())</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  <span class="co"># predict on test data</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> df_test)</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>  <span class="co"># compute RMSE on test set</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((preds <span class="sc">-</span> y_test)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>  rmse</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## [1] 1.001534</code></pre>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>In this example, the most plausible model in the Rashomon set was a
+simple one-variable model,<br />
+which achieved a test-set RMSE of approximately 1.0.</p>
+<p>This demonstrates two important ideas behind the <strong>multi-path
+AIC</strong> workflow:</p>
+<ol style="list-style-type: decimal">
+<li>Multiple models can have nearly identical AIC, forming a
+<em>Rashomon set</em> of explanations.<br />
+</li>
+<li>Combining AIC with <strong>stability</strong> and
+<strong>out-of-sample RMSE</strong> helps identify models that are
+both<br />
+interpretable and well-supported by the data.</li>
+</ol>
+<p>The <code>mpssAIC</code> package provides a principled way to explore
+model uncertainty and select robust,<br />
+predictive models without relying on a single stepwise path.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
