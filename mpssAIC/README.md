@@ -141,20 +141,38 @@ X_best <- X[, best_idx, drop = FALSE]
 fit <- glm(y ~ ., data = data.frame(y = y, X_best), family = binomial())
 
 # Compute confusion matrix
-cm_result <- confusion_metrics(fit, y = y, cutoff = 0.5)
-print(cm_result$confusion_matrix)
-print(cm_result$metrics)
+# Evaluate best model with confusion matrix
+best_idx <- as.integer(strsplit(plausible$key[1], ",")[[1]])
+X_best <- X[, best_idx, drop = FALSE]
+fit <- glm(y ~ ., data = data.frame(y = y, X_best), family = binomial())
+
+# Predicted probabilities
+p_hat <- predict(fit, type = "response")
+
+# Confusion matrix (manually)
+cutoff <- 0.5
+y_pred <- as.integer(p_hat >= cutoff)
+cm <- table(Actual = y, Predicted = y_pred)
+print(cm)
+
+# Metrics using package confusion_metrics(y_true, p_hat, cutoff)
+metrics_df <- confusion_metrics(
+  y_true = y,
+  p_hat  = p_hat,
+  cutoff = cutoff
+)
+print(metrics_df)
 ```
 
 **Expected Output:**
 ```
-        True
-Predicted  0  1
-        0 68  8
-        1  7 67
+      Predicted
+Actual  0  1
+     0 49 17
+     1 13 71
 
-  prevalence    accuracy sensitivity specificity         FDR         DOR 
-      0.5000      0.9000      0.8933      0.9067      0.0946     73.5714
+  accuracy sensitivity specificity       FDR      DOR
+1      0.8   0.8452381   0.7424242 0.1931818 15.74208
 ```
 
 ## Core Functions
