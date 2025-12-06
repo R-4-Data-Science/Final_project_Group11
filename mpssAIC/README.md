@@ -29,6 +29,8 @@ devtools::install_github(
 library(mpssAIC)
 ```
 
+Other packages, such as `devtools`, `care`, and `corpcor` may be required by the package. Install them first if the installation process complains.
+
 ## Quick Start
 
 ### Example 1: Linear Regression (Gaussian)
