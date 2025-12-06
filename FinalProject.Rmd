@@ -867,9 +867,12 @@ confusion_metrics <- function(
 
 ## Linear Regression (Synthetic)
 
-For classification, we use a binary outcome. Here, high MPG (≥20) vs. low MPG (<20).
+Here we use the synthetic Gaussian regression data defined above, with a continuous response generated from a sparse true β.
 
 ```{r example-Linear}
+
+#Here we use the synthetic Gaussian regression data defined above, with a continuous response generated from a sparse true β.
+
 cat("\n\n")
 cat(strrep("#", 70), "\n")
 cat("COMPLETE EXAMPLE: LINEAR REGRESSION (Synthetic Data)\n")
